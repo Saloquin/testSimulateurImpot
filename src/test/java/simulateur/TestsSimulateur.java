@@ -3,6 +3,7 @@ package simulateur;
 import com.kerware.simulateur.AdaptateurSimulateur;
 import com.kerware.simulateur.ICalculateurImpot;
 import com.kerware.simulateur.SituationFamiliale;
+import com.kerware.simulateurreusine.AdaptateurSimulateurReusine;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,7 +22,7 @@ public class TestsSimulateur {
 
     @BeforeAll
     public static void setUp() {
-        simulateur = new AdaptateurSimulateur();
+        simulateur = new AdaptateurSimulateurReusine();
     }
 
     public static Stream<Arguments> donneesPartsFoyerFiscal() {

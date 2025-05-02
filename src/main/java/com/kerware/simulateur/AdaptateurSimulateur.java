@@ -91,4 +91,5 @@ public class AdaptateurSimulateur implements ICalculateurImpot {
     public int getImpotSurRevenuNet() {
         return (int)simulateur.getImpotNet();
     }
+
 }
