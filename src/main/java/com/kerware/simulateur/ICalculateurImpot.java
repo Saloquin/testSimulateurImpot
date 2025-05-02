@@ -2,7 +2,8 @@ package com.kerware.simulateur;
 
 public interface ICalculateurImpot {
 
-    public void setRevenusNet( int rn );
+    public void setRevenusNetDeclarant1( int rn );
+    public void setRevenusNetDeclarant2( int rn );
     public void setSituationFamiliale( SituationFamiliale sf );
     public void setNbEnfantsACharge( int nbe );
     public void setNbEnfantsSituationHandicap( int nbesh );
@@ -10,6 +11,9 @@ public interface ICalculateurImpot {
 
     public void calculImpotSurRevenuNet();
 
+    public int getRevenuNetDeclatant1();
+    public int getRevenuNetDeclatant2();
+    public double getContribExceptionnelle();
     public int getRevenuFiscalReference();
     public int getAbattement();
     public double getNbPartsFoyerFiscal();
@@ -17,7 +21,4 @@ public interface ICalculateurImpot {
     public int getDecote();
     public int getImpotSurRevenuNet();
 
-    int getRevenuNet();
-
-    int getRevenuReference();
 }

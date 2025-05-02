@@ -43,6 +43,31 @@ public class Simulateur {
 
     private double[] taux = new double[5];
 
+    // Les limites des tranches pour la contribution exceptionnelle sur les hauts revenus
+    private int lce00 = 0;
+    private int lce01 = 250000;
+    private int lce02 = 500000;
+    private int lce03 = 1000000;
+    private int lce04 = Integer.MAX_VALUE;
+
+    private int[] limitesCEHR = new int[5];
+
+    // Les taux de la contribution exceptionnelle sur les hauts revenus pour les celibataires
+    private double tce00 = 0.0;
+    private double tce01 = 0.03;
+    private double tce02 = 0.04;
+    private double tce03 = 0.04;
+
+    private double[] tauxCEHRCelibataire = new double[4];
+
+    // Les taux de la contribution exceptionnelle sur les hauts revenus pour les couples
+    private double tce00C = 0.0;
+    private double tce01C = 0.0;
+    private double tce02C = 0.03;
+    private double tce03C = 0.04;
+
+    private double[] tauxCEHRCouple = new double[4];
+
     // Abattement
     private  int lAbtMax = 14171;
     private  int lAbtMin = 495;
@@ -59,7 +84,8 @@ public class Simulateur {
     private double tauxDecote = 0.4525;
 
     // revenu net
-    private int rNet = 0;
+    private int rNetDecl1 = 0;
+    private int rNetDecl2 = 0;
     // nb enfants
     private int nbEnf = 0;
     // nb enfants handicapés
@@ -79,10 +105,8 @@ public class Simulateur {
     // nombre de parts du foyer fiscal
     private double nbPts = 0;
 
-
     // decote
     private double decote = 0;
-
     // impôt des déclarants
     private double mImpDecl = 0;
     // impôt du foyer fiscal
@@ -90,6 +114,8 @@ public class Simulateur {
     private double mImpAvantDecote = 0;
     // parent isolé
     private boolean parIso = false;
+    // Contribution exceptionnelle sur les hauts revenus
+    private double contribExceptionnelle = 0;
 
     // Getters pour adapter le code legacy pour les tests unitaires
 
@@ -101,9 +127,6 @@ public class Simulateur {
         return decote;
     }
 
-    public int getRevenuNet() {
-        return rNet;
-    }
 
     public double getAbattement() {
         return abt;
@@ -121,14 +144,25 @@ public class Simulateur {
         return mImp;
     }
 
+    public int getRevenuNetDeclatant1() {
+        return rNetDecl1;
+    }
+
+    public int getRevenuNetDeclatant2() {
+        return rNetDecl2;
+    }
+
+    public double getContribExceptionnelle() {
+        return contribExceptionnelle;
+    }
 
 
     // Fonction de calcul de l'impôt sur le revenu net en France en 2024 sur les revenu 2023
 
-    public long calculImpot( int revNet, SituationFamiliale sitFam, int nbEnfants, int nbEnfantsHandicapes, boolean parentIsol) {
+    public int calculImpot( int revNetDecl1, int revNetDecl2, SituationFamiliale sitFam, int nbEnfants, int nbEnfantsHandicapes, boolean parentIsol) {
 
         // Préconditions
-        if ( revNet < 0 ) {
+        if ( revNetDecl1  < 0 || revNetDecl2 < 0 ) {
             throw new IllegalArgumentException("Le revenu net ne peut pas être négatif");
         }
 
@@ -141,7 +175,7 @@ public class Simulateur {
         }
 
         if ( sitFam == null ) {
-            throw new IllegalArgumentException("La situation familiale ne peut pas être nulle");
+            throw new IllegalArgumentException("La situation familiale ne peut pas être null");
         }
 
         if ( nbEnfantsHandicapes > nbEnfants ) {
@@ -156,11 +190,15 @@ public class Simulateur {
             throw new IllegalArgumentException("Un parent isolé ne peut pas être marié ou pacsé");
         }
 
+        boolean seul = sitFam == SituationFamiliale.CELIBATAIRE || sitFam == SituationFamiliale.DIVORCE || sitFam == SituationFamiliale.VEUF;
+        if (  seul && revNetDecl2 > 0 ) {
+            throw new IllegalArgumentException("Un célibataire, un divorcé ou un veuf ne peut pas avoir de revenu pour le déclarant 2");
+        }
 
         // Initialisation des variables
 
-
-        rNet = revNet;
+        rNetDecl1 = revNetDecl1;
+        rNetDecl2 = revNetDecl2;
 
         nbEnf = nbEnfants;
         nbEnfH = nbEnfantsHandicapes;
@@ -179,27 +217,61 @@ public class Simulateur {
         taux[3] = t03;
         taux[4] = t04;
 
+        limitesCEHR[0] = lce00;
+        limitesCEHR[1] = lce01;
+        limitesCEHR[2] = lce02;
+        limitesCEHR[3] = lce03;
+        limitesCEHR[4] = lce04;
+
+        tauxCEHRCelibataire[0] = tce00;
+        tauxCEHRCelibataire[1] = tce01;
+        tauxCEHRCelibataire[2] = tce02;
+        tauxCEHRCelibataire[3] = tce03;
+
+        tauxCEHRCouple[0] = tce00C;
+        tauxCEHRCouple[1] = tce01C;
+        tauxCEHRCouple[2] = tce02C;
+        tauxCEHRCouple[3] = tce03C;
+
         System.out.println("--------------------------------------------------");
-        System.out.println( "Revenu net déclaré : " + rNet );
+        System.out.println( "Revenu net declarant1 : " + rNetDecl1 );
+        System.out.println( "Revenu net declarant2 : " + rNetDecl2 );
         System.out.println( "Situation familiale : " + sitFam.name() );
 
         // Abattement
         // EXIGENCE : EXG_IMPOT_02
-        abt = rNet * tAbt;
+        long abt1 = Math.round(rNetDecl1 * tAbt);
+        long abt2 = Math.round(rNetDecl2 * tAbt);
 
-        if (abt > lAbtMax) {
-            abt = lAbtMax;
+        if (abt1 > lAbtMax) {
+            abt1 = lAbtMax;
+        }
+        if ( sitFam == SituationFamiliale.MARIE || sitFam == SituationFamiliale.PACSE ) {
+            if (abt2 > lAbtMax) {
+                abt2 = lAbtMax;
+            }
         }
 
-        if (abt < lAbtMin) {
-            abt = lAbtMin;
+        if (abt1 < lAbtMin) {
+            abt1 = lAbtMin;
         }
 
+        if ( sitFam == SituationFamiliale.MARIE || sitFam == SituationFamiliale.PACSE ) {
+            if (abt2 < lAbtMin) {
+                abt2 = lAbtMin;
+            }
+        }
+
+        abt = abt1 + abt2;
         System.out.println( "Abattement : " + abt );
 
-        rFRef = rNet - abt;
+        rFRef = rNetDecl1 + revNetDecl2 - abt;
+        if ( rFRef < 0 ) {
+            rFRef = 0;
+        }
 
         System.out.println( "Revenu fiscal de référence : " + rFRef );
+
 
         // parts déclarants
         // EXIG  : EXG_IMPOT_03
@@ -225,31 +297,56 @@ public class Simulateur {
         System.out.println( "Nombre d'enfants handicapés : " + nbEnfH );
 
         // parts enfants à charge
-        if (nbEnf <= 2) {
+        if ( nbEnf <= 2 ) {
             nbPts = nbPtsDecl + nbEnf * 0.5;
-        } else if (nbEnf > 2) {
-            nbPts = nbPtsDecl + 1.0 + (nbEnf - 2);
+        } else if ( nbEnf > 2 ) {
+            nbPts = nbPtsDecl+  1.0 + ( nbEnf - 2 );
         }
 
         // parent isolé
 
         System.out.println( "Parent isolé : " + parIso );
 
-        if (parIso) {
-            if (nbEnf > 0) {
+        if ( parIso ) {
+            if ( nbEnf > 0 ){
                 nbPts = nbPts + 0.5;
             }
         }
 
         // Veuf avec enfant
-        if (sitFam == SituationFamiliale.VEUF && nbEnf > 0) {
+        if ( sitFam == SituationFamiliale.VEUF && nbEnf > 0 ) {
             nbPts = nbPts + 1;
         }
 
-// enfant handicapé
+        // enfant handicapé
         nbPts = nbPts + nbEnfH * 0.5;
 
         System.out.println( "Nombre de parts : " + nbPts );
+
+        // EXIGENCE : EXG_IMPOT_07:
+        // Contribution exceptionnelle sur les hauts revenus
+        contribExceptionnelle = 0;
+        int i = 0;
+        do {
+            if ( rFRef >= limitesCEHR[i] && rFRef < limitesCEHR[i+1] ) {
+                if ( nbPtsDecl == 1 ) {
+                    contribExceptionnelle += ( rFRef - limitesCEHR[i] ) * tauxCEHRCelibataire[i];
+                } else {
+                    contribExceptionnelle += ( rFRef - limitesCEHR[i] ) * tauxCEHRCouple[i];
+                }
+                break;
+            } else {
+                if ( nbPtsDecl == 1 ) {
+                    contribExceptionnelle += ( limitesCEHR[i+1] - limitesCEHR[i] ) * tauxCEHRCelibataire[i];
+                } else {
+                    contribExceptionnelle += ( limitesCEHR[i+1] - limitesCEHR[i] ) * tauxCEHRCouple[i];
+                }
+            }
+            i++;
+        } while( i < 5);
+
+        contribExceptionnelle = Math.round( contribExceptionnelle );
+        System.out.println( "Contribution exceptionnelle sur les hauts revenus : " + contribExceptionnelle );
 
         // Calcul impôt des declarants
         // EXIGENCE : EXG_IMPOT_04
@@ -257,7 +354,7 @@ public class Simulateur {
 
         mImpDecl = 0;
 
-        int i = 0;
+        i = 0;
         do {
             if ( rImposable >= limites[i] && rImposable < limites[i+1] ) {
                 mImpDecl += ( rImposable - limites[i] ) * taux[i];
@@ -297,6 +394,7 @@ public class Simulateur {
         // Vérification de la baisse d'impôt autorisée
         // EXIGENCE : EXG_IMPOT_05
         // baisse impot
+
         double baisseImpot = mImpDecl - mImp;
 
         System.out.println( "Baisse d'impôt : " + baisseImpot );
@@ -314,74 +412,42 @@ public class Simulateur {
 
         System.out.println( "Impôt brut après plafonnement avant decote : " + mImp );
         mImpAvantDecote = mImp;
+
         // Calcul de la decote
         // EXIGENCE : EXG_IMPOT_06
 
-        // Calcul de la decote
-decote = 0;
-if (nbPtsDecl == 1 && mImp < seuilDecoteDeclarantSeul) {
-    decote = decoteMaxDeclarantSeul - (mImp * tauxDecote);
-} else if (nbPtsDecl == 2 && mImp < seuilDecoteDeclarantCouple) {
-    decote = decoteMaxDeclarantCouple - (mImp * tauxDecote);
-}
-decote = Math.round(decote);
-
-if (mImp <= decote) {
-    decote = mImp;
-}
-
-System.out.println("Decote : " + decote);
-
-mImp = mImp - decote;
-
-System.out.println("Impôt sur le revenu net final : " + mImp);
-return Math.round(mImp);
-    }
-
-    /*public static void main(String[] args) {
-
-     public void testRobustesse(int revenuNet, String situationFamiliale, int nbEnfantsACharge, int nbEnfantsSituationHandicap, boolean parentIsole, String messageAttendu) {
-        simulateur.setRevenusNet(revenuNet);
-        if (situationFamiliale != null) {
-            simulateur.setSituationFamiliale(SituationFamiliale.valueOf(situationFamiliale));
+        decote = 0;
+        // decote
+        if ( nbPtsDecl == 1 ) {
+            if ( mImp < seuilDecoteDeclarantSeul ) {
+                 decote = decoteMaxDeclarantSeul - ( mImp  * tauxDecote );
+            }
         }
-        simulateur.setNbEnfantsACharge(nbEnfantsACharge);
-        simulateur.setNbEnfantsSituationHandicap(nbEnfantsSituationHandicap);
-        simulateur.setParentIsole(parentIsole);
+        if (  nbPtsDecl == 2 ) {
+            if ( mImp < seuilDecoteDeclarantCouple ) {
+                 decote =  decoteMaxDeclarantCouple - ( mImp  * tauxDecote  );
+            }
+        }
+        decote = Math.round( decote );
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            simulateur.calculImpotSurRevenuNet();
-        });
+        if ( mImp <= decote ) {
+            decote = mImp;
+        }
 
-        assertEquals(messageAttendu, exception.getMessage());
+        System.out.println( "Decote : " + decote );
+
+        mImp = mImp - decote;
+
+        mImp += contribExceptionnelle;
+
+        mImp = Math.round( mImp );
+
+        System.out.println( "Impôt sur le revenu net final : " + mImp );
+        return  (int)mImp;
     }
-        Simulateur simulateur = new Simulateur();
-
-        long impot = simulateur.calculImpot(65000, SituationFamiliale.MARIE, 3, 0, false);
-        System.out.println("Impot sur le revenu net : " + impot);
-
-        impot = simulateur.calculImpot(65000, SituationFamiliale.VEUF, 3, 0, false);
-        System.out.println("Impot sur le revenu net : " + impot);
 
 
-        impot = simulateur.calculImpot(65000, SituationFamiliale.MARIE, 3, 1, false);
-        System.out.println("Impot sur le revenu net : " + impot);
 
-        impot = simulateur.calculImpot(35000, SituationFamiliale.DIVORCE, 1, 0, true);
-        System.out.println("Impot sur le revenu net : " + impot);
 
-        impot = simulateur.calculImpot(35000, SituationFamiliale.DIVORCE, 2, 0, true);
-        System.out.println("Impot sur le revenu net : " + impot);
-
-        impot = simulateur.calculImpot(50000, SituationFamiliale.DIVORCE, 3, 0, true);
-        System.out.println("Impot sur le revenu net : " + impot);
-
-        impot = simulateur.calculImpot(50000, SituationFamiliale.DIVORCE, 3, 1, true);
-        System.out.println("Impot sur le revenu net : " + impot);
-
-        impot = simulateur.calculImpot(200000, SituationFamiliale.CELIBATAIRE, 0, 0, false);
-        System.out.println("Impot sur le revenu net : " + impot);
-
-    }*/
 
 }

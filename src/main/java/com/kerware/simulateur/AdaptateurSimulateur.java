@@ -4,15 +4,22 @@ public class AdaptateurSimulateur implements ICalculateurImpot {
 
     private Simulateur simulateur = new Simulateur();
 
-    private int revenusNet;
+    private int revenusNetDecl1 = 0;
+    private int revenusNetDecl2 = 0;
     private SituationFamiliale situationFamiliale;
     private int nbEnfantsACharge;
     private int nbEnfantsSituationHandicap;
     private boolean parentIsole;
 
+
     @Override
-    public void setRevenusNet(int rn) {
-        this.revenusNet = rn;
+    public void setRevenusNetDeclarant1(int rn) {
+        this.revenusNetDecl1 = rn;
+    }
+
+    @Override
+    public void setRevenusNetDeclarant2(int rn) {
+        this.revenusNetDecl2 = rn;
     }
 
     @Override
@@ -37,7 +44,22 @@ public class AdaptateurSimulateur implements ICalculateurImpot {
 
     @Override
     public void calculImpotSurRevenuNet() {
-         simulateur.calculImpot(revenusNet, situationFamiliale, nbEnfantsACharge, nbEnfantsSituationHandicap, parentIsole);
+         simulateur.calculImpot(revenusNetDecl1, revenusNetDecl2 ,situationFamiliale, nbEnfantsACharge, nbEnfantsSituationHandicap, parentIsole);
+    }
+
+    @Override
+    public int getRevenuNetDeclatant1() {
+        return revenusNetDecl1;
+    }
+
+    @Override
+    public int getRevenuNetDeclatant2() {
+        return revenusNetDecl2;
+    }
+
+    @Override
+    public double getContribExceptionnelle() {
+        return simulateur.getContribExceptionnelle();
     }
 
     @Override
@@ -68,15 +90,5 @@ public class AdaptateurSimulateur implements ICalculateurImpot {
     @Override
     public int getImpotSurRevenuNet() {
         return (int)simulateur.getImpotNet();
-    }
-
-    @Override
-    public int getRevenuNet() {
-        return (int)simulateur.getRevenuNet();
-    }
-
-    @Override
-    public int getRevenuReference() {
-        return (int)simulateur.getRevenuReference();
     }
 }
