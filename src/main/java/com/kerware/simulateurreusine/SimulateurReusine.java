@@ -43,7 +43,6 @@ public final class SimulateurReusine {
         static final double DEMI_PART = 0.5;
         static final double PART_ENTIERE = 1.0;
         static final double DEUX_PARTS = 2.0;
-        static final int NB_ENFANTS_MAX = 7;
         static final int SEUIL_ENFANTS_DEMI_PARTS = 2;
     }
     
@@ -59,8 +58,8 @@ public final class SimulateurReusine {
     }
 
     // État du foyer fiscal
-    private FoyerFiscal foyerFiscal;
-    private ResultatCalcul resultat;
+    private final FoyerFiscal foyerFiscal;
+    private final ResultatCalcul resultat;
 
     public SimulateurReusine() {
         this.foyerFiscal = new FoyerFiscal();
@@ -110,7 +109,8 @@ public final class SimulateurReusine {
                 || situationFamiliale == SituationFamiliale.VEUF;
         if (estSeul && revenuNetDeclarant2 > 0) {
             throw new IllegalArgumentException(
-                    "Un célibataire, divorcé ou veuf ne peut pas avoir de revenu pour le déclarant 2"
+                    "Un célibataire, divorcé ou veuf " +
+                            "ne peut pas avoir de revenu pour le déclarant 2"
             );
         }
         if (nombreEnfantsACharge < 0) {
