@@ -1,4 +1,4 @@
-package com.kerware.simulateur;
+package com.kerware.simulateurreusine;
 
 public interface ICalculateurImpot {
 

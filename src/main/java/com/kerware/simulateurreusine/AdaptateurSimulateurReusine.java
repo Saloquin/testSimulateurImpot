@@ -1,7 +1,5 @@
 package com.kerware.simulateurreusine;
 
-import com.kerware.simulateur.ICalculateurImpot;
-import com.kerware.simulateur.SituationFamiliale;
 
 /**
  * Adaptateur pour le nouveau simulateur d'impôt.

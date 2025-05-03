@@ -1,7 +1,5 @@
 package com.kerware.simulateurreusine;
 
-import com.kerware.simulateur.SituationFamiliale;
-
 /**
  * Simulateur d'impôt sur le revenu 2025 (revenus 2024)
  * Cette classe implémente le calcul de l'impôt sur le revenu en France

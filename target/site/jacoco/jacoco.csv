@@ -1,8 +1,9 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 SimulateurImpot2024,com.kerware.simulateurreusine,SimulateurReusine.ContributionHautsRevenus,0,62,0,0,0,3,0,1,0,1
 SimulateurImpot2024,com.kerware.simulateurreusine,SimulateurReusine.TranchesImposition,0,51,0,0,0,2,0,1,0,1
-SimulateurImpot2024,com.kerware.simulateurreusine,SimulateurReusine,26,689,8,73,6,138,12,53,4,20
-SimulateurImpot2024,com.kerware.simulateurreusine,AdaptateurSimulateurReusine,25,62,0,0,6,20,6,11,6,11
-SimulateurImpot2024,com.kerware.simulateur,SituationFamiliale,0,33,0,0,0,6,0,1,0,1
+SimulateurImpot2024,com.kerware.simulateurreusine,SimulateurReusine,5,692,7,74,1,149,7,58,0,24
+SimulateurImpot2024,com.kerware.simulateurreusine,AdaptateurSimulateurReusine,0,87,0,0,0,26,0,17,0,17
+SimulateurImpot2024,com.kerware.simulateurreusine,SituationFamiliale,0,33,0,0,0,6,0,1,0,1
+SimulateurImpot2024,com.kerware.simulateur,SituationFamiliale,33,0,0,0,6,0,1,0,1,0
 SimulateurImpot2024,com.kerware.simulateur,AdaptateurSimulateur,94,0,0,0,27,0,17,0,17,0
 SimulateurImpot2024,com.kerware.simulateur,Simulateur,1127,0,100,0,218,0,63,0,11,0
