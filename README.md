@@ -1,10 +1,5 @@
 # Mini-Projet de Réusinage du Simulateur
 
-## 📅 Deadline : Fin avril 2025  
-Projet à soumettre sur GitHub
-
----
-
 ## 🎯 Objectif
 
 Réusiner une classe de simulateur existante dans un nouveau package, tout en conservant la validité des tests unitaires fonctionnels existants. L’objectif est d’obtenir un code propre, lisible, bien structuré, et conforme aux bonnes pratiques.
@@ -48,7 +43,7 @@ Réusiner une classe de simulateur existante dans un nouveau package, tout en co
 
 - Java
 - JUnit (ou autre framework de test unitaire)
-- CheckStyle (avec fichier `but-unicaen.xml` fourni)
+- CheckStyle (avec fichier `iut-unicaen-check.xml` fourni)
 - Génération de rapports HTML (JaCoCo ou autre outil de couverture de code)
 
 ---
