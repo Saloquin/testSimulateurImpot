@@ -44,7 +44,10 @@ public class AdaptateurSimulateur implements ICalculateurImpot {
 
     @Override
     public void calculImpotSurRevenuNet() {
-         simulateur.calculImpot(revenusNetDecl1, revenusNetDecl2 ,situationFamiliale, nbEnfantsACharge, nbEnfantsSituationHandicap, parentIsole);
+         simulateur.calculImpot(
+                 revenusNetDecl1, revenusNetDecl2 ,
+                 situationFamiliale, nbEnfantsACharge,
+                 nbEnfantsSituationHandicap, parentIsole);
     }
 
     @Override

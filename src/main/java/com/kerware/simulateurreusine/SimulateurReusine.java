@@ -122,7 +122,8 @@ public final class SimulateurReusine {
         }
         if (nombreEnfantsACharge > ConstantesCalcul.NOMBRE_ENFANTS_MAX) {
             throw new IllegalArgumentException(
-                "Le nombre d'enfants ne peut pas être supérieur à " + ConstantesCalcul.NOMBRE_ENFANTS_MAX
+                "Le nombre d'enfants ne peut pas être supérieur à "
+                        + ConstantesCalcul.NOMBRE_ENFANTS_MAX
             );
         }
         if (parentIsole && (situationFamiliale == SituationFamiliale.MARIE 
@@ -139,9 +140,10 @@ public final class SimulateurReusine {
         }
     }
 
-    private void initialiserFoyerFiscal(int revenuNetDeclarant1, int revenuNetDeclarant2,
-                                      SituationFamiliale situationFamiliale, int nombreEnfantsACharge,
-                                      int nombreEnfantsHandicapes, boolean parentIsole) {
+    private void initialiserFoyerFiscal(
+            int revenuNetDeclarant1, int revenuNetDeclarant2,
+            SituationFamiliale situationFamiliale, int nombreEnfantsACharge,
+            int nombreEnfantsHandicapes, boolean parentIsole) {
         foyerFiscal.revenuNetDeclarant1 = revenuNetDeclarant1;
         foyerFiscal.revenuNetDeclarant2 = revenuNetDeclarant2;
         foyerFiscal.situationFamiliale = situationFamiliale;
@@ -153,8 +155,10 @@ public final class SimulateurReusine {
     private void calculerPartsImposition() {
         // Calcul du nombre de parts pour les déclarants
         switch (foyerFiscal.situationFamiliale) {
-            case CELIBATAIRE, DIVORCE, VEUF -> foyerFiscal.nombrePartsDeclarants = PartsFiscales.PART_ENTIERE;
-            case MARIE, PACSE -> foyerFiscal.nombrePartsDeclarants = PartsFiscales.DEUX_PARTS;
+            case CELIBATAIRE, DIVORCE, VEUF ->
+                    foyerFiscal.nombrePartsDeclarants = PartsFiscales.PART_ENTIERE;
+            case MARIE, PACSE ->
+                    foyerFiscal.nombrePartsDeclarants = PartsFiscales.DEUX_PARTS;
             default -> throw new IllegalStateException("Situation familiale non gérée");
         }
 
@@ -228,7 +232,8 @@ public final class SimulateurReusine {
                 impot += montantImposable * TranchesImposition.TAUX[i];
                 break;
             } else {
-                double montantImposable = TranchesImposition.LIMITES[i + 1] - TranchesImposition.LIMITES[i];
+                double montantImposable =
+                        TranchesImposition.LIMITES[i + 1] - TranchesImposition.LIMITES[i];
                 impot += montantImposable * TranchesImposition.TAUX[i];
             }
             i++;
@@ -238,7 +243,8 @@ public final class SimulateurReusine {
 
     private void calculerImpotBrut() {
         // Calcul de l'impôt des déclarants (pour le plafonnement du quotient familial)
-        double revenuImposableDeclarants = resultat.revenuFiscalReference / foyerFiscal.nombrePartsDeclarants;
+        double revenuImposableDeclarants =
+                resultat.revenuFiscalReference / foyerFiscal.nombrePartsDeclarants;
         double impotDeclarantsParPart = calculerImpotParTranches(revenuImposableDeclarants);
         resultat.impotBrut = impotDeclarantsParPart * foyerFiscal.nombrePartsDeclarants;
         resultat.impotBrut = Math.round(resultat.impotBrut);
@@ -253,7 +259,8 @@ public final class SimulateurReusine {
     private void appliquerPlafonnementQuotientFamilial() {
         double baisseImpot = resultat.impotBrut - resultat.impotAvantDecote;
         double ecartParts = foyerFiscal.nombreParts - foyerFiscal.nombrePartsDeclarants;
-        double plafond = Math.round((ecartParts / ConstantesCalcul.DEMI_PART) * PLAFOND_AVANTAGE_DEMI_PART);
+        double plafond =
+                Math.round((ecartParts / ConstantesCalcul.DEMI_PART) * PLAFOND_AVANTAGE_DEMI_PART);
 
         if (baisseImpot >= plafond) {
             resultat.impotAvantDecote = resultat.impotBrut - plafond;
@@ -315,7 +322,8 @@ public final class SimulateurReusine {
     }
 
     private void calculerImpotFinal() {
-        resultat.impotNet = resultat.impotAvantDecote - resultat.decote + resultat.contributionExceptionnelle;
+        resultat.impotNet =
+                resultat.impotAvantDecote - resultat.decote + resultat.contributionExceptionnelle;
         resultat.impotNet = Math.round(resultat.impotNet);
     }
 
