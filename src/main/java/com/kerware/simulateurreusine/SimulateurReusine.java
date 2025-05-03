@@ -13,7 +13,6 @@ public final class SimulateurReusine {
     private static final class TranchesImposition {
         static final double[] TAUX = {0.0, 0.11, 0.30, 0.41, 0.45};
         static final int[] LIMITES = {0, 11294, 28797, 82341, 177106, Integer.MAX_VALUE};
-        static final int NB_TRANCHES = 5;
     }
     
     // Constantes pour la contribution exceptionnelle hauts revenus
@@ -21,7 +20,6 @@ public final class SimulateurReusine {
         static final int[] LIMITES = {0, 250000, 500000, 1000000, Integer.MAX_VALUE};
         static final double[] TAUX_CELIBATAIRE = {0.0, 0.03, 0.04, 0.04};
         static final double[] TAUX_COUPLE = {0.0, 0.0, 0.03, 0.04};
-        static final int NB_TRANCHES = 4;
     }
     
     // Constantes pour l'abattement
@@ -107,6 +105,14 @@ public final class SimulateurReusine {
         if (situationFamiliale == null) {
             throw new IllegalArgumentException("La situation familiale ne peut pas être null");
         }
+        boolean estSeul = situationFamiliale == SituationFamiliale.CELIBATAIRE
+                || situationFamiliale == SituationFamiliale.DIVORCE
+                || situationFamiliale == SituationFamiliale.VEUF;
+        if (estSeul && revenuNetDeclarant2 > 0) {
+            throw new IllegalArgumentException(
+                    "Un célibataire, divorcé ou veuf ne peut pas avoir de revenu pour le déclarant 2"
+            );
+        }
         if (nombreEnfantsACharge < 0) {
             throw new IllegalArgumentException("Le nombre d'enfants ne peut pas être négatif");
         }
@@ -130,14 +136,7 @@ public final class SimulateurReusine {
             || situationFamiliale == SituationFamiliale.PACSE)) {
             throw new IllegalArgumentException("Un parent isolé ne peut pas être marié ou pacsé");
         }
-        boolean estSeul = situationFamiliale == SituationFamiliale.CELIBATAIRE 
-            || situationFamiliale == SituationFamiliale.DIVORCE
-            || situationFamiliale == SituationFamiliale.VEUF;
-        if (estSeul && revenuNetDeclarant2 > 0) {
-            throw new IllegalArgumentException(
-                "Un célibataire, divorcé ou veuf ne peut pas avoir de revenu pour le déclarant 2"
-            );
-        }
+
     }
 
     private void initialiserFoyerFiscal(
@@ -244,20 +243,20 @@ public final class SimulateurReusine {
     private void calculerImpotBrut() {
         // Calcul de l'impôt des déclarants (pour le plafonnement du quotient familial)
         double revenuImposableDeclarants =
-                resultat.revenuFiscalReference / foyerFiscal.nombrePartsDeclarants;
+                getRevenuFiscalReference() / foyerFiscal.nombrePartsDeclarants;
         double impotDeclarantsParPart = calculerImpotParTranches(revenuImposableDeclarants);
         resultat.impotBrut = impotDeclarantsParPart * foyerFiscal.nombrePartsDeclarants;
         resultat.impotBrut = Math.round(resultat.impotBrut);
 
         // Calcul de l'impôt du foyer fiscal
-        double revenuImposableFoyer = resultat.revenuFiscalReference / foyerFiscal.nombreParts;
+        double revenuImposableFoyer = getRevenuFiscalReference() / foyerFiscal.nombreParts;
         double impotFoyerParPart = calculerImpotParTranches(revenuImposableFoyer);
         resultat.impotAvantDecote = impotFoyerParPart * foyerFiscal.nombreParts;
-        resultat.impotAvantDecote = Math.round(resultat.impotAvantDecote);
+        resultat.impotAvantDecote = Math.round(getImpotAvantDecote());
     }
 
     private void appliquerPlafonnementQuotientFamilial() {
-        double baisseImpot = resultat.impotBrut - resultat.impotAvantDecote;
+        double baisseImpot = resultat.impotBrut - getImpotAvantDecote();
         double ecartParts = foyerFiscal.nombreParts - foyerFiscal.nombrePartsDeclarants;
         double plafond =
                 Math.round((ecartParts / ConstantesCalcul.DEMI_PART) * PLAFOND_AVANTAGE_DEMI_PART);
@@ -274,21 +273,21 @@ public final class SimulateurReusine {
         } else if (foyerFiscal.nombrePartsDeclarants == 2) {
             calculerDecoteCouple();
         }
-        resultat.decote = Math.min(resultat.decote, resultat.impotAvantDecote);
+        resultat.decote = Math.min(getDecote(), getImpotAvantDecote());
     }
 
     private void calculerDecoteSeul() {
-        if (resultat.impotAvantDecote < Decote.SEUIL_DECLARANT_SEUL) {
+        if (getImpotAvantDecote() < Decote.SEUIL_DECLARANT_SEUL) {
             double decoteTemp = Decote.MAXIMUM_DECLARANT_SEUL 
-                - (resultat.impotAvantDecote * Decote.TAUX);
+                - (getImpotAvantDecote() * Decote.TAUX);
             resultat.decote = Math.round(decoteTemp);
         }
     }
 
     private void calculerDecoteCouple() {
-        if (resultat.impotAvantDecote < Decote.SEUIL_DECLARANT_COUPLE) {
+        if (getImpotAvantDecote() < Decote.SEUIL_DECLARANT_COUPLE) {
             double decoteTemp = Decote.MAXIMUM_DECLARANT_COUPLE 
-                - (resultat.impotAvantDecote * Decote.TAUX);
+                - (getImpotAvantDecote() * Decote.TAUX);
             resultat.decote = Math.round(decoteTemp);
         }
     }
@@ -298,7 +297,7 @@ public final class SimulateurReusine {
         for (int i = 0; i < ConstantesCalcul.NB_TRANCHES_CONTRIB; i++) {
             calculerContributionTranche(i);
         }
-        resultat.contributionExceptionnelle = Math.round(resultat.contributionExceptionnelle);
+        resultat.contributionExceptionnelle = Math.round(getContributionExceptionnelle());
     }
 
     private void calculerContributionTranche(int indexTranche) {
@@ -308,14 +307,14 @@ public final class SimulateurReusine {
             ? ContributionHautsRevenus.TAUX_CELIBATAIRE 
             : ContributionHautsRevenus.TAUX_COUPLE;
 
-        if (resultat.revenuFiscalReference >= limiteInferieure 
-            && resultat.revenuFiscalReference < limiteSuperieure) {
-            double difference = resultat.revenuFiscalReference - limiteInferieure;
+        if (getRevenuFiscalReference() >= limiteInferieure
+            && getRevenuFiscalReference() < limiteSuperieure) {
+            double difference = getRevenuFiscalReference() - limiteInferieure;
             resultat.contributionExceptionnelle += difference * tauxApplicables[indexTranche];
             return;
         }
 
-        if (resultat.revenuFiscalReference >= limiteSuperieure) {
+        if (getRevenuFiscalReference() >= limiteSuperieure) {
             double difference = limiteSuperieure - limiteInferieure;
             resultat.contributionExceptionnelle += difference * tauxApplicables[indexTranche];
         }
@@ -323,7 +322,7 @@ public final class SimulateurReusine {
 
     private void calculerImpotFinal() {
         resultat.impotNet =
-                resultat.impotAvantDecote - resultat.decote + resultat.contributionExceptionnelle;
+                getImpotAvantDecote() - getDecote() + getContributionExceptionnelle();
         resultat.impotNet = Math.round(resultat.impotNet);
     }
 
