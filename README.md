@@ -63,12 +63,7 @@ Réusiner une classe de simulateur existante dans un nouveau package, tout en co
 
 ---
 
-## 📌 Remarques
 
-- Le code final doit être propre, maintenable, et conforme aux bonnes pratiques de développement logiciel.
-- Il s’agit d’un exercice de **qualité logicielle**, pas seulement de fonctionnalité.
 
----
 
-## 📂 Structure recommandée
 
