@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdaptateurSimulateurReusine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SimulateurImpot2024</a> &gt; <a href="index.source.html" class="el_package">com.kerware.simulateurreusine</a> &gt; <span class="el_source">AdaptateurSimulateurReusine.java</span></div><h1>AdaptateurSimulateurReusine.java</h1><pre class="source lang-java linenums">package com.kerware.simulateurreusine;
+
+import com.kerware.simulateur.ICalculateurImpot;
+import com.kerware.simulateur.SituationFamiliale;
+
+/**
+ * Adaptateur pour le nouveau simulateur d'impôt.
+ * Permet de maintenir la compatibilité avec les tests existants
+ * tout en utilisant la nouvelle implémentation réusinée.
+ * Cette classe n'est pas conçue pour être étendue.
+ */
+public final class AdaptateurSimulateurReusine implements ICalculateurImpot {
+    
+    private final SimulateurReusine simulateur;
+    private int revenusNetDecl1;
+    private int revenusNetDecl2;
+    private SituationFamiliale situationFamiliale;
+    private int nbEnfantsACharge;
+    private int nbEnfantsSituationHandicap;
+    private boolean parentIsole;
+
+    /**
+     * Constructeur de l'adaptateur.
+     */
+<span class="fc" id="L25">    public AdaptateurSimulateurReusine() {</span>
+<span class="fc" id="L26">        this.simulateur = new SimulateurReusine();</span>
+<span class="fc" id="L27">    }</span>
+
+    /**
+     * Définit le revenu net du premier déclarant.
+     * @param rn le revenu net du premier déclarant
+     */
+    @Override
+    public void setRevenusNetDeclarant1(int rn) {
+<span class="fc" id="L35">        this.revenusNetDecl1 = rn;</span>
+<span class="fc" id="L36">    }</span>
+
+    /**
+     * Définit le revenu net du second déclarant.
+     * @param rn le revenu net du second déclarant
+     */
+    @Override
+    public void setRevenusNetDeclarant2(int rn) {
+<span class="fc" id="L44">        this.revenusNetDecl2 = rn;</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Définit la situation familiale du foyer fiscal.
+     * @param sf la situation familiale (CELIBATAIRE, MARIE, PACSE, DIVORCE, VEUF)
+     */
+    @Override
+    public void setSituationFamiliale(SituationFamiliale sf) {
+<span class="fc" id="L53">        this.situationFamiliale = sf;</span>
+<span class="fc" id="L54">    }</span>
+
+    /**
+     * Définit le nombre d'enfants à charge du foyer fiscal.
+     * @param nbe le nombre d'enfants à charge
+     */
+    @Override
+    public void setNbEnfantsACharge(int nbe) {
+<span class="fc" id="L62">        this.nbEnfantsACharge = nbe;</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * Définit le nombre d'enfants en situation de handicap.
+     * @param nbesh le nombre d'enfants en situation de handicap
+     */
+    @Override
+    public void setNbEnfantsSituationHandicap(int nbesh) {
+<span class="fc" id="L71">        this.nbEnfantsSituationHandicap = nbesh;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * Définit si le contribuable est un parent isolé.
+     * @param pi true si le contribuable est un parent isolé, false sinon
+     */
+    @Override
+    public void setParentIsole(boolean pi) {
+<span class="fc" id="L80">        this.parentIsole = pi;</span>
+<span class="fc" id="L81">    }</span>
+
+    /**
+     * Calcule l'impôt sur le revenu net en utilisant les paramètres précédemment définis.
+     * Cette méthode doit être appelée après avoir défini tous les paramètres nécessaires.
+     */
+    @Override
+    public void calculImpotSurRevenuNet() {
+<span class="fc" id="L89">        simulateur.calculerImpot(</span>
+            revenusNetDecl1,
+            revenusNetDecl2,
+            situationFamiliale,
+            nbEnfantsACharge,
+            nbEnfantsSituationHandicap,
+            parentIsole
+        );
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * Obtient le revenu net du premier déclarant.
+     * @return le revenu net du premier déclarant
+     */
+    @Override
+    public int getRevenuNetDeclatant1() {
+<span class="nc" id="L105">        return revenusNetDecl1;</span>
+    }
+
+    /**
+     * Obtient le revenu net du second déclarant.
+     * @return le revenu net du second déclarant
+     */
+    @Override
+    public int getRevenuNetDeclatant2() {
+<span class="nc" id="L114">        return revenusNetDecl2;</span>
+    }
+
+    /**
+     * Obtient le montant de la contribution exceptionnelle sur les hauts revenus.
+     * @return le montant de la contribution exceptionnelle
+     */
+    @Override
+    public double getContribExceptionnelle() {
+<span class="nc" id="L123">        return simulateur.getContributionExceptionnelle();</span>
+    }
+
+    /**
+     * Obtient le revenu fiscal de référence du foyer.
+     * @return le revenu fiscal de référence
+     */
+    @Override
+    public int getRevenuFiscalReference() {
+<span class="nc" id="L132">        return (int) simulateur.getRevenuFiscalReference();</span>
+    }
+
+    /**
+     * Obtient le montant total de l'abattement appliqué.
+     * @return le montant de l'abattement
+     */
+    @Override
+    public int getAbattement() {
+<span class="fc" id="L141">        return (int) simulateur.getAbattement();</span>
+    }
+
+    /**
+     * Obtient le nombre de parts du foyer fiscal.
+     * @return le nombre de parts du foyer fiscal
+     */
+    @Override
+    public double getNbPartsFoyerFiscal() {
+<span class="fc" id="L150">        return simulateur.getNombrePartsFoyerFiscal();</span>
+    }
+
+    /**
+     * Obtient le montant de l'impôt avant application de la décote.
+     * @return le montant de l'impôt avant décote
+     */
+    @Override
+    public int getImpotAvantDecote() {
+<span class="nc" id="L159">        return (int) simulateur.getImpotAvantDecote();</span>
+    }
+
+    /**
+     * Obtient le montant de la décote appliquée.
+     * @return le montant de la décote
+     */
+    @Override
+    public int getDecote() {
+<span class="nc" id="L168">        return (int) simulateur.getDecote();</span>
+    }
+
+    /**
+     * Obtient le montant final de l'impôt sur le revenu net.
+     * @return le montant final de l'impôt
+     */
+    @Override
+    public int getImpotSurRevenuNet() {
+<span class="fc" id="L177">        return (int) simulateur.getImpotNet();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

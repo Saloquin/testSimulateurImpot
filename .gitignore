@@ -1,4 +1,12 @@
-target/
+# ignore all build output in target/
+target/*
+
+# but keep the site directory itself
+!target/site/
+
+# and keep everything under target/site/
+!target/site/**
+
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
