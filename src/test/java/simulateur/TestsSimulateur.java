@@ -129,6 +129,37 @@ public class TestsSimulateur {
         assertEquals(   impotAttendu, simulateur.getImpotSurRevenuNet());
     }
 
+    public static Stream<Arguments> donneesContributionExceptionnelle() {
+        return Stream.of(
+                Arguments.of(250000, "CELIBATAIRE", 0, 0, false, 0),
+                Arguments.of(300000, "CELIBATAIRE", 0, 0, false, 1075),
+                Arguments.of(600000, "CELIBATAIRE", 0, 0, false, 10933),
+                Arguments.of(1200000, "CELIBATAIRE", 0, 0, false, 34933),
+                Arguments.of(600000, "MARIE", 0, 0, false, 2560)
+        );
+    }
+
+    // COUVERTURE EXIGENCE : EXG_IMPOT_07
+    @DisplayName("Tests de la contribution exceptionnelle sur les hauts revenus")
+    @ParameterizedTest
+    @MethodSource("donneesContributionExceptionnelle")
+    public void testContributionExceptionnelle(int revenuNet, String situationFamiliale, int nbEnfantsACharge,
+                                               int nbEnfantsSituationHandicap, boolean parentIsole, int contributionAttendue) {
+
+        // Arrange
+        simulateur.setRevenusNetDeclarant1(revenuNet);
+        simulateur.setRevenusNetDeclarant2(0);
+        simulateur.setSituationFamiliale(SituationFamiliale.valueOf(situationFamiliale));
+        simulateur.setNbEnfantsACharge(nbEnfantsACharge);
+        simulateur.setNbEnfantsSituationHandicap(nbEnfantsSituationHandicap);
+        simulateur.setParentIsole(parentIsole);
+
+        // Act
+        simulateur.calculImpotSurRevenuNet();
+
+        // Assert
+        assertEquals(contributionAttendue, simulateur.getContribExceptionnelle());
+    }
 
 
     public static Stream<Arguments> donneesRobustesse() {
@@ -146,6 +177,132 @@ public class TestsSimulateur {
                 Arguments.of(200000,10000, "DIVORCE", 8, 0, false)
         );
     }
+
+    public static Stream<Arguments> donneesRevenusNetDeclatant1() {
+        return Stream.of(
+                Arguments.of(0, 0),
+                Arguments.of(15000, 15000),
+                Arguments.of(30000, 30000)
+        );
+    }
+    @DisplayName("Tests du revenu net du premier déclarant")
+    @ParameterizedTest
+    @MethodSource("donneesRevenusNetDeclatant1")
+    public void testGetRevenuNetDeclatant1(int revenuNetDecl1, int revenuAttendu) {
+        // Arrange
+        simulateur.setRevenusNetDeclarant1(revenuNetDecl1);
+
+        // Act
+        int result = simulateur.getRevenuNetDeclatant1();
+
+        // Assert
+        assertEquals(revenuAttendu, result);
+    }
+
+    public static Stream<Arguments> donneesRevenusNetDeclatant2() {
+        return Stream.of(
+                Arguments.of(0, 0),
+                Arguments.of(15000, 15000),
+                Arguments.of(30000, 30000)
+        );
+    }
+
+    @DisplayName("Tests du revenu net du second déclarant")
+    @ParameterizedTest
+    @MethodSource("donneesRevenusNetDeclatant2")
+    public void testGetRevenuNetDeclatant2(int revenuNetDecl2, int revenuAttendu) {
+        // Arrange
+        simulateur.setRevenusNetDeclarant2(revenuNetDecl2);
+
+        // Act
+        int result = simulateur.getRevenuNetDeclatant2();
+
+        // Assert
+        assertEquals(revenuAttendu, result);
+    }
+
+    public static Stream<Arguments> donneesRevenuFiscalReference() {
+        return Stream.of(
+                Arguments.of(20000, 10000, 27000), // Example with abattement applied
+                Arguments.of(50000, 20000, 63000),
+                Arguments.of(100000, 50000, 135000)
+        );
+    }
+
+    @DisplayName("Tests du revenu fiscal de référence")
+    @ParameterizedTest
+    @MethodSource("donneesRevenuFiscalReference")
+    public void testGetRevenuFiscalReference(int revenuNetDecl1, int revenuNetDecl2, int revenuFiscalAttendu) {
+        // Arrange
+        simulateur.setRevenusNetDeclarant1(revenuNetDecl1);
+        simulateur.setRevenusNetDeclarant2(revenuNetDecl2);
+        simulateur.setParentIsole(false);
+        simulateur.setSituationFamiliale(SituationFamiliale.MARIE);
+        simulateur.calculImpotSurRevenuNet();
+
+        // Act
+        int result = simulateur.getRevenuFiscalReference();
+
+        // Assert
+        assertEquals(revenuFiscalAttendu, result);
+    }
+
+    public static Stream<Arguments> donneesImpotAvantDecote() {
+        return Stream.of(
+                Arguments.of(20000, 0, "CELIBATAIRE", 738), // Single declarant, tax brackets applied
+                Arguments.of(50000, 0, "CELIBATAIRE", 6786), // Single declarant, higher income
+                Arguments.of(100000, 0, "CELIBATAIRE", 21129), // Single declarant, top brackets
+                Arguments.of(50000, 50000, "MARIE", 13572), // Couple, combined income
+                Arguments.of(100000, 100000, "MARIE", 42257) // Couple, higher combined income
+        );
+    }
+
+    @DisplayName("Tests de l'impôt avant décote avec calcul des parts")
+    @ParameterizedTest
+    @MethodSource("donneesImpotAvantDecote")
+    public void testGetImpotAvantDecote(int revenuNetDecl1, int revenuNetDecl2, String situationFamiliale, int impotAvantDecoteAttendu) {
+        // Arrange
+        simulateur.setRevenusNetDeclarant1(revenuNetDecl1);
+        simulateur.setRevenusNetDeclarant2(revenuNetDecl2);
+        simulateur.setSituationFamiliale(SituationFamiliale.valueOf(situationFamiliale));
+        simulateur.calculImpotSurRevenuNet();
+
+        // Act
+        int result = simulateur.getImpotAvantDecote();
+
+        // Assert
+        assertEquals(impotAvantDecoteAttendu, result);
+    }
+
+    public static Stream<Arguments> donneesDecote() {
+        return Stream.of(
+                Arguments.of(1500, 0, "CELIBATAIRE", 1, 0),
+                Arguments.of(2000, 0, "CELIBATAIRE", 1, 0),
+                Arguments.of(1000, 0, "CELIBATAIRE", 1, 0),
+                Arguments.of(3000, 0, "MARIE", 2, 0),
+                Arguments.of(3500, 0, "MARIE", 2, 0)
+        );
+    }
+
+    @DisplayName("Tests de la décote avec prise en compte du nombre de parts déclarants")
+    @ParameterizedTest
+    @MethodSource("donneesDecote")
+    public void testCalculerDecote(int revenuNetDecl1, int revenuNetDecl2, String situationFamiliale,
+                                   int nombrePartsDeclarants, int decoteAttendue) {
+        // Arrange
+        simulateur.setRevenusNetDeclarant1(revenuNetDecl1);
+        simulateur.setRevenusNetDeclarant2(revenuNetDecl2);
+        simulateur.setSituationFamiliale(SituationFamiliale.valueOf(situationFamiliale));
+        simulateur.calculImpotSurRevenuNet();
+
+        // Act
+        int result = simulateur.getDecote();
+
+        // Assert
+        assertEquals(decoteAttendue, result);
+    }
+
+
 
     // COUVERTURE EXIGENCE : Robustesse
     @DisplayName("Tests de robustesse avec des valeurs interdites")
