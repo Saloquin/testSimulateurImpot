@@ -4,6 +4,3 @@ SimulateurImpot2024,com.kerware.simulateurreusine,SimulateurReusine.TranchesImpo
 SimulateurImpot2024,com.kerware.simulateurreusine,SimulateurReusine,5,692,7,74,1,149,7,58,0,24
 SimulateurImpot2024,com.kerware.simulateurreusine,AdaptateurSimulateurReusine,0,87,0,0,0,26,0,17,0,17
 SimulateurImpot2024,com.kerware.simulateurreusine,SituationFamiliale,0,33,0,0,0,6,0,1,0,1
-SimulateurImpot2024,com.kerware.simulateur,SituationFamiliale,33,0,0,0,6,0,1,0,1,0
-SimulateurImpot2024,com.kerware.simulateur,AdaptateurSimulateur,94,0,0,0,27,0,17,0,17,0
-SimulateurImpot2024,com.kerware.simulateur,Simulateur,1127,0,100,0,218,0,63,0,11,0
