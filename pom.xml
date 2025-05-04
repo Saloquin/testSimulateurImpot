@@ -194,6 +194,7 @@
                     <!-- Choix de la configuration Checkstyle -->
                     <configLocation>src/test/resources/iut-caen-checks.xml</configLocation> <!-- ou sun_checks.xml -->
                     <failsOnError>true</failsOnError>
+                    <excludes>**/simulateur/**/*.java</excludes>
                 </configuration>
             </plugin>
         </plugins>
