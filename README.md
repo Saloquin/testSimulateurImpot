@@ -1,5 +1,10 @@
 # Mini-Projet de Réusinage du Simulateur
 
+## Auteurs
+
+- Camille Gillé
+- Thomas Roger
+
 ## 🎯 Objectif
 
 Réusiner une classe de simulateur existante dans un nouveau package, tout en conservant la validité des tests unitaires fonctionnels existants. L’objectif est d’obtenir un code propre, lisible, bien structuré, et conforme aux bonnes pratiques.
@@ -35,7 +40,7 @@ Réusiner une classe de simulateur existante dans un nouveau package, tout en co
    - Générer des rapports HTML montrant que :
      - ✅ 100% des **tests unitaires passent**.
      - ✅ Les tests couvrent **au moins 90% du code** du simulateur réusiné.
-     - ✅ Le code passe une **analyse statique** avec **CheckStyle** et le fichier de règles `but-unicaen.xml`.
+     - ✅ Le code passe une **analyse statique** avec **CheckStyle** et le fichier de règles `iut-unicaen-checks.xml`.
 
 ---
 
@@ -43,7 +48,7 @@ Réusiner une classe de simulateur existante dans un nouveau package, tout en co
 
 - Java
 - JUnit (ou autre framework de test unitaire)
-- CheckStyle (avec fichier `iut-unicaen-check.xml` fourni)
+- CheckStyle (avec fichier `iut-unicaen-checks.xml` fourni)
 - Génération de rapports HTML (JaCoCo ou autre outil de couverture de code)
 
 ---
